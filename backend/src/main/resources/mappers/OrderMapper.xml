@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.dao.OrderDao">
+    <resultMap id="OrderResultMap" type="org.example.entities.Order" autoMapping="true">
+        <id property="id" column="order_id"/>
+        <result property="gym" column="gym" jdbcType="INTEGER"/>
+        <result property="date" column="date" jdbcType="DATE"/>
+        <result property="begin_time" column="begin_time" jdbcType="FLOAT"/>
+        <result property="finish_time" column="finish_time" jdbcType="FLOAT"/>
+        <result property="field_no" column="field_no" jdbcType="INTEGER"/>
+        <association property="seller" javaType="org.example.entities.User" column="seller_id"
+                     select="org.example.dao.UserDao.selectUserById"/>
+        <association property="purchaser" javaType="org.example.entities.User" column="purchaser_id"
+                     select="org.example.dao.UserDao.selectUserById"/>
+        <association property="fieldOrder" javaType="org.example.entities.ScreenShot" column="order_shot_id"
+                     select="org.example.dao.ScreenShotDao.selectScreenShotById"/>
+        <association property="payed" javaType="org.example.entities.ScreenShot" column="payed_shot_id"
+                     select="org.example.dao.ScreenShotDao.selectScreenShotById"/>
+        <association property="payment" javaType="org.example.entities.ScreenShot" column="payment_shot_id"
+                     select="org.example.dao.ScreenShotDao.selectScreenShotById"/>
+    </resultMap>
+    <select id="selectOrdersByDate" resultMap="OrderResultMap">
+        select id as order_id,
+               gym,
+               begin_time,
+               finish_time,
+               field_no,
+               payment_shot_id,
+               seller_id,
+               purchaser_id
+        from order_form
+        where begin_time >= #{begin_time}
+    </select>
+    <select id="selectOrdersByDateandGym" resultMap="OrderResultMap">
+        select id as order_id,
+               gym,
+               begin_time,
+               finish_time,
+               field_no,
+               payment_shot_id,
+               seller_id,
+               purchaser_id
+        from order_form
+        where begin_time >= #{begin_time}
+          and gym = #{gym}
+    </select>
+    <select id="selectHistoryOrdersBySellerId" resultMap="OrderResultMap">
+        select id as order_id,
+               gym,
+               begin_time,
+               finish_time,
+               field_no,
+               payment_shot_id,
+               seller_id,
+               purchaser_id,
+               payed_shot_id,
+               order_shot_id
+        from order_form
+        where seller_id = #{user_id}
+        Order By id DESC
+    </select>
+    <select id="selectHistoryOrdersByPurchaserId" resultMap="OrderResultMap">
+        select id as order_id,
+               gym,
+               begin_time,
+               finish_time,
+               field_no,
+               payment_shot_id,
+               seller_id,
+               purchaser_id,
+               payed_shot_id,
+               order_shot_id
+        from order_form
+        where purchaser_id = #{user_id}
+        Order By id DESC
+    </select>
+
+    <select id="selectAllOrders" resultMap="OrderResultMap">
+        select *
+        from order_form;
+    </select>
+    <select id="selecetOrderShotById" resultType="org.example.entities.ScreenShot">
+        select screen_shot.id as id, url, type
+        from screen_shot
+                 inner join order_form
+        where order_form.order_shot_id = screen_shot.id
+          and order_form.id = #{id}
+    </select>
+    <select id="selectOrderById" resultMap="OrderResultMap">
+        select id as order_id,
+               gym,
+               begin_time,
+               finish_time,
+               field_no,
+               payment_shot_id,
+               seller_id,
+               purchaser_id,
+               order_shot_id,
+               payed_shot_id
+        from order_form
+        where id = #{id}
+    </select>
+    <insert id="insertOrder" parameterType="org.example.entities.Order" useGeneratedKeys="true" keyProperty="id">
+        insert into order_form(id, seller_id, gym, begin_time, finish_time, field_no, order_shot_id, payment_shot_id)
+        values (#{id}, #{seller.id}, #{gym}, #{begin_time}, #{finish_time}, #{field_no}, #{fieldOrder.id},
+                #{payment.id})
+    </insert>
+    <update id="updatePayedShot">
+        update order_form
+        set payed_shot_id=#{payed_shot_id}
+        where id = #{order_id}
+    </update>
+    <update id="updatePurchaser">
+        update order_form
+        set purchaser_id=#{purchaser_id}
+        where id = #{order_id}
+    </update>
+    <update id="updatePurchaserNull">
+        update order_form
+        set purchaser_id=NULL
+        where id = #{order_id}
+    </update>
+    <delete id="deleteOrderById">
+        delete from order_form where id=#{id}
+    </delete>
+
+</mapper>

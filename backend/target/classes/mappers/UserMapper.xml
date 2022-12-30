@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.dao.UserDao">
+    <resultMap id="UserResultMap" type="org.example.entities.User" autoMapping="true">
+        <id property="id" column="user_id"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="passwords" column="passwords" jdbcType="VARCHAR"/>
+        <result property="creditworthiness" column="creditworthiness" jdbcType="INTEGER"/>
+        <result property="identity" column="identity" jdbcType="TINYINT"/>
+        <result property="blocked" column="blocked" jdbcType="TINYINT"/>
+    </resultMap>
+    <select id="selectUserByName" resultType="org.example.entities.User">
+        select *
+        from user
+        where name = #{name}
+    </select>
+    <select id="selectAllUsers" resultType="org.example.entities.User">
+        select *
+        from user
+        where `identity` = false
+        ORDER BY creditworthiness DESC
+    </select>
+    <select id="selectUserById" resultType="org.example.entities.User">
+        select *
+        from user
+        where id = #{id}
+    </select>
+    <insert id="insertUser" parameterType="org.example.entities.User" useGeneratedKeys="true" keyProperty="id">
+        insert into user(id, name, passwords, creditworthiness, identity, blocked)
+        values (#{id}, #{name}, #{passwords}, #{creditworthiness}, #{identity}, #{blocked})
+    </insert>
+    <update id="updateCreditworthiness">
+        update user
+        set creditworthiness = creditworthiness + 1
+        where id = #{id}
+    </update>
+    <update id="updateBlocked">
+        update user
+        set blocked = true
+        where id = #{id};
+    </update>
+</mapper>

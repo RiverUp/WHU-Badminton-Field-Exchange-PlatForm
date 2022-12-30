@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.dao.MessageDao">
+    <resultMap id="MessageResultMap" type="org.example.entities.Message" autoMapping="true">
+        <id property="id" column="message_id"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <association property="receiver" javaType="org.example.entities.User" column="receiver_id"
+                     select="org.example.dao.UserDao.selectUserById"/>
+        <association property="order" javaType="org.example.entities.Order" column="order_id"
+                     select="org.example.dao.OrderDao.selectOrderById"/>
+    </resultMap>
+    <select id="selectMessageByUser" resultMap="MessageResultMap">
+        select id as message_id,
+        receiver_id,
+        content,
+        `read`,
+        order_id,
+        type
+        from message
+        where receiver_id = #{receiver_id}
+        Order By id DESC
+    </select>
+    <insert id="insertMessage" parameterType="org.example.entities.Message" useGeneratedKeys="true" keyProperty="id">
+        insert into message(id, receiver_id, content, `read`, order_id, type)
+        values (#{id}, #{receiver.id}, #{content}, false, #{order.id}, #{type})
+    </insert>
+    <update id="updateMessageRead">
+        update message
+        set `read`= true
+        where id = #{message_id}
+    </update>
+</mapper>

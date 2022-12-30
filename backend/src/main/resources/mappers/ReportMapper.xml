@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.dao.ReportDao">
+    <resultMap id="ReportResultMap" type="org.example.entities.Report" autoMapping="true">
+        <id property="id" column="report_id"/>
+        <result property="evidence" jdbcType="LONGVARCHAR" column="evidence"/>
+        <result property="state" jdbcType="INTEGER" column="state"/>
+        <association property="evidencePicture" javaType="org.example.entities.ScreenShot" column="evidence_picture"
+                     select="org.example.dao.ScreenShotDao.selectScreenShotById"/>
+        <association property="reporter" javaType="org.example.entities.User" column="reporter_id"
+                     select="org.example.dao.UserDao.selectUserById"/>
+        <association property="reported" javaType="org.example.entities.User" column="reported_id"
+                     select="org.example.dao.UserDao.selectUserById"/>
+        <association property="order" javaType="org.example.entities.Order" column="order_id"
+                     select="org.example.dao.OrderDao.selectOrderById"/>
+    </resultMap>
+    <select id="selectAllReports" resultMap="ReportResultMap">
+        select id as report_id,
+               evidence,
+               `state`,
+               reporter_id,
+               reported_id,
+               order_id,
+               evidence_picture
+        from report
+        where `state` = 0
+    </select>
+    <select id="selectReportByUserId" resultMap="ReportResultMap">
+        select id as report_id,
+               evidence,
+               state,
+               reporter_id,
+               reported_id,
+               order_id,
+               evidence_picture
+        from report
+        where reported_id = #{user_id}
+    </select>
+    <select id="selectReportById" resultMap="ReportResultMap">
+        select id as report_id,
+               evidence,
+               `state`,
+               reporter_id,
+               reported_id,
+               order_id,
+               evidence_picture
+        from report
+        where id = #{id}
+    </select>
+    <insert id="insertReport" parameterType="org.example.entities.Report" useGeneratedKeys="true" keyProperty="id">
+        insert into report (id, reporter_id, reported_id, evidence, state, order_id, evidence_picture)
+        values (#{id}, #{reporter.id}, #{reported.id}, #{evidence}, #{state}, #{order.id}, #{evidencePicture.id});
+    </insert>
+    <update id="updateResult">
+        update report
+        set state=#{state}
+        where id = #{id}
+    </update>
+</mapper>
